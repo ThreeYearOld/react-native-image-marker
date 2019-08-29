@@ -478,9 +478,8 @@ RCT_EXPORT_METHOD(addText: (nonnull NSDictionary *)src
 
 
 RCT_EXPORT_METHOD(addMultipleTexts: (nonnull NSDictionary *)src
-                  text:(nonnull NSString*)text
-                  scale:(CGFloat)scale
                   textOptions:(nonnull NSSArray*)textOptions
+                  scale:(CGFloat)scale
                   quality:(NSInteger) quality
                   filename: (NSString *)filename
                   saveFormat: (NSString *)saveFormat
@@ -508,26 +507,27 @@ RCT_EXPORT_METHOD(addMultipleTexts: (nonnull NSDictionary *)src
             // 获取font
             NSString *fontName = [RCTConvert NSString: option[@"fontName"]];
             CGFloat fontSize   = [RCTConvert CGFloat: option[@"fontSize"]];
-            UIFont* font = [UIFont fontWithName:fontName size:fontSize];
+            UIFont* font       = [UIFont fontWithName:fontName size:fontSize];
             // 获取颜色
             NSString *color    = [RCTConvert NSString: option[@"color"]];
-            UIColor* uiColor = [self getColor:color];
+            UIColor* uiColor   = [self getColor:color];
             // 获取阴影
             NSDictionary *shadowStyle = [RCTConvert NSDictionary: option[@"shadowStyle"]];
-            NSShadow* shadow = [self getShadowStyle: shadowStyle];
+            NSShadow* shadow          = [self getShadowStyle: shadowStyle];
             // 获取文字背景
             NSDictionary *textBackgroundStyle = [RCTConvert NSDictionary: option[@"textBackgroundStyle"]];
-            TextBackground* textBackground = [self getTextBackgroundStyle: textBackgroundStyle];
+            TextBackground* textBackground    = [self getTextBackgroundStyle: textBackgroundStyle];
             // 获取起始坐标
             CGFloat x = [RCTConvert CGFloat: option[@"locationX"]];
             CGFloat y = [RCTConvert CGFloat: option[@"locationY"]];
             // 创建model对象
             TextOption *textModel = [TextOption alloc] init];
-            textModel.x = x;
-            textModel.y = y;
+            textModel.text = text;
+            textModel.x    = x;
+            textModel.y    = y;
             textModel.textColor = uiColor;
-            textModel.textFont = font;
-            textModel.shadow = shadow;
+            textModel.textFont  = font;
+            textModel.shadow    = shadow;
             textModel.textBackground = textBackground;
             // 添加
             [modelOptions addObject:textModel];
