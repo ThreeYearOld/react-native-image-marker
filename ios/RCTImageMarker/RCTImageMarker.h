@@ -30,5 +30,5 @@
 @property (copy) UIColor * textColor;
 @property (copy) UIFont * textFont;
 @property (copy) NSShadow * shadow;
-@property (copy) TextBackground * textBackground;
+@property (strong) TextBackground * textBackground;
 @end
