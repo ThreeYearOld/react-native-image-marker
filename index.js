@@ -41,11 +41,11 @@ export type TextBackgroundStyle = {
 }
 
 export type ImageFormat = $Enum<{
-  'png': string,
-  'jpg': String,
-}>
+      'png': string,
+      'jpg': String,
+    }>
 
-type TextMarkOption = {
+    type TextMarkOption = {
   // image src, local image
   src: string,
   text: string,
@@ -143,34 +143,34 @@ export default class Marker {
 
     if (!position) {
       return ImageMarker.addText(
-        srcObj,
-        text,
-        X,
-        Y,
-        color,
-        fontName,
-        fontSize,
-        mShadowStyle,
-        mTextBackgroundStyle,
-        scale,
-        quality,
-        filename,
-        saveFormat
+          srcObj,
+          text,
+          X,
+          Y,
+          color,
+          fontName,
+          fontSize,
+          mShadowStyle,
+          mTextBackgroundStyle,
+          scale,
+          quality,
+          filename,
+          saveFormat
       )
     } else {
       return ImageMarker.addTextByPostion(
-        srcObj,
-        text,
-        position,
-        color,
-        fontName,
-        fontSize,
-        mShadowStyle,
-        mTextBackgroundStyle,
-        scale,
-        quality,
-        filename,
-        saveFormat
+          srcObj,
+          text,
+          position,
+          color,
+          fontName,
+          fontSize,
+          mShadowStyle,
+          mTextBackgroundStyle,
+          scale,
+          quality,
+          filename,
+          saveFormat
       )
     }
   }
@@ -178,8 +178,8 @@ export default class Marker {
   static markMultipleTexts (option: MultipleTextsMarkOption) {
     const {
       src,
-      scale,
       textOptions,
+      scale,
       quality,
       filename,
       saveFormat
@@ -200,14 +200,13 @@ export default class Marker {
         __packager_asset: false
       }
     }
-
     return ImageMarker.addMultipleTexts(
-      srcObj,
-      scale,
-      textOptions,
-      quality,
-      filename,
-      saveFormat
+        srcObj,
+        textOptions,
+        scale,
+        quality,
+        filename,
+        saveFormat
     )
   }
 
@@ -250,26 +249,26 @@ export default class Marker {
 
     if (!position) {
       return ImageMarker.markWithImage(
-        srcObj,
-        markerObj,
-        X,
-        Y,
-        scale,
-        markerScale,
-        quality,
-        filename,
-        saveFormat
+          srcObj,
+          markerObj,
+          X,
+          Y,
+          scale,
+          markerScale,
+          quality,
+          filename,
+          saveFormat
       )
     } else {
       return ImageMarker.markWithImageByPosition(
-        srcObj,
-        markerObj,
-        position,
-        scale,
-        markerScale,
-        quality,
-        filename,
-        saveFormat
+          srcObj,
+          markerObj,
+          position,
+          scale,
+          markerScale,
+          quality,
+          filename,
+          saveFormat
       )
     }
   }

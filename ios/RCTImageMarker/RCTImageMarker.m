@@ -136,21 +136,20 @@ UIImage * markerImgWithMultipleTexts(UIImage *image, NSArray <TextOption *>*text
             NSShadowAttributeName: option.shadow
         };
         CGSize size = [option.text sizeWithAttributes:attr];
-        if (textBackground != nil) {
+        if (option.textBackground != nil) {
            CGContextRef context = UIGraphicsGetCurrentContext();
            CGContextSetFillColorWithColor(context, option.textBackground.colorBg.CGColor);
            if ([option.textBackground.typeBg isEqualToString:@"stretchX"]) {
                CGContextFillRect(context, CGRectMake(0, option.y - option.textBackground.paddingY, w, size.height + 2*option.textBackground.paddingY));
-           }else if([textBackground.typeBg isEqualToString:@"stretchY"]) {
+           }else if([option.textBackground.typeBg isEqualToString:@"stretchY"]) {
                CGContextFillRect(context, CGRectMake(option.x - option.textBackground.paddingX, 0, size.width + 2*option.textBackground.paddingX, h));
            }else {
-               CGContextFillRect(context, CGRectMake(option.x - option.textBackground.paddingX, option.y - option.textBackground.paddingY,
-                                                              size.width + 2*option.textBackground.paddingX, size.height + 2*option.textBackground.paddingY));
+               CGContextFillRect(context, CGRectMake(option.x - option.textBackground.paddingX, option.y - option.textBackground.paddingY,size.width + 2*option.textBackground.paddingX, size.height + 2*option.textBackground.paddingY));
            }
         }
-        CGRect rect = (CGRect){ CGPointMake(option.y, option.y), size };
+        CGRect rect = (CGRect){CGPointMake(option.x, option.y), size};
         // 绘制(水印)
-        [text drawInRect:rect withAttributes:attr];
+        [option.text drawInRect:rect withAttributes:attr];
     }
     UIImage *aimg = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
@@ -478,11 +477,11 @@ RCT_EXPORT_METHOD(addText: (nonnull NSDictionary *)src
 
 
 RCT_EXPORT_METHOD(addMultipleTexts: (nonnull NSDictionary *)src
-                  textOptions:(nonnull NSSArray*)textOptions
+                  textOptions:(nonnull NSArray <NSDictionary *>*)textOptions
                   scale:(CGFloat)scale
                   quality:(NSInteger) quality
-                  filename: (NSString *)filename
-                  saveFormat: (NSString *)saveFormat
+                  filename:(NSString *)filename
+                  saveFormat:(NSString *)saveFormat
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -518,10 +517,10 @@ RCT_EXPORT_METHOD(addMultipleTexts: (nonnull NSDictionary *)src
             NSDictionary *textBackgroundStyle = [RCTConvert NSDictionary: option[@"textBackgroundStyle"]];
             TextBackground* textBackground    = [self getTextBackgroundStyle: textBackgroundStyle];
             // 获取起始坐标
-            CGFloat x = [RCTConvert CGFloat: option[@"locationX"]];
-            CGFloat y = [RCTConvert CGFloat: option[@"locationY"]];
+            CGFloat x = [RCTConvert CGFloat: option[@"x"]];
+            CGFloat y = [RCTConvert CGFloat: option[@"y"]];
             // 创建model对象
-            TextOption *textModel = [TextOption alloc] init];
+            TextOption *textModel = [[TextOption alloc] init];
             textModel.text = text;
             textModel.x    = x;
             textModel.y    = y;
@@ -533,7 +532,7 @@ RCT_EXPORT_METHOD(addMultipleTexts: (nonnull NSDictionary *)src
             [modelOptions addObject:textModel];
           }
 
-        UIImage * scaledImage = markerImgWithMultipleTexts(image, text, modelOptions, scale);
+        UIImage * scaledImage = markerImgWithMultipleTexts(image, modelOptions, scale);
         if (scaledImage == nil) {
             NSLog(@"Can't mark the image");
             reject(@"error",@"Can't mark the image.", error);
@@ -702,9 +701,5 @@ RCT_EXPORT_METHOD(markWithImageByPosition: (nonnull NSDictionary *)src
         }];
     }];
 }
-
-
-
-
 
 @end
