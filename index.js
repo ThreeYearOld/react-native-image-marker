@@ -69,8 +69,8 @@ export type ImageFormat = $Enum<{
 
 type textInfoOption = {
   text: string,
-  locationX?: number,
-  locationY?: number,
+  x?: number,
+  y?: number,
   color: string,
   fontName: string,
   fontSize: number,
