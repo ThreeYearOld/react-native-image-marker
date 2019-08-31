@@ -128,6 +128,12 @@ UIImage * markerImgWithMultipleTexts(UIImage *image, NSArray <TextOption *>*text
 
     UIGraphicsBeginImageContextWithOptions(image.size, NO, scale);
     [image drawInRect:CGRectMake(0, 0, w, h)];
+    // 当数组为空时
+    if (textOptions.count == 0) {
+            UIImage *aimg = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+            return aimg;
+    }
     // 遍历
     for (TextOption *option in textOptions) {
         NSDictionary *attr = @{
@@ -500,6 +506,11 @@ RCT_EXPORT_METHOD(addMultipleTexts: (nonnull NSDictionary *)src
 
         // Do mark
         if (textOptions.count == 0) {
+            UIImage * scaledImage = markerImgWithMultipleTexts(image, nil, scale);
+            if (scaledImage == nil) {
+                reject(@"error",@"Can't mark the image.", error);
+                return;
+            }
             saveImageForMarker(fullPath, scaledImage, quality, [self isPng:saveFormat]);
             resolve(fullPath);
             return;
