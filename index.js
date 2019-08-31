@@ -189,10 +189,6 @@ export default class Marker {
       throw new Error('please set image!')
     }
 
-    if (!textOptions.length) {
-      throw new Error('Please set textOptions')
-    }
-
     let srcObj = resolveAssetSource(src)
     if (!srcObj) {
       srcObj = {
