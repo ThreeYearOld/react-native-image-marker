@@ -454,10 +454,19 @@ public class ImageMarkerManager extends ReactContextBaseJavaModule {
                 System.gc();
             }
 
-            //设置画笔
             //建立画笔
             TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.DEV_KERN_TEXT_FLAG);
             textPaint.setAntiAlias(true);
+
+            if (options.size() == 0) {
+                bos = new BufferedOutputStream(new FileOutputStream(dest));
+                icon.compress(getSaveFormat(saveFormat), quality, bos);
+                bos.flush();
+                //保存成功的
+                promise.resolve(dest);
+                return;
+            }
+
             for (int i = 0; i < options.size(); i++) {
                 ReadableMap map = options.getMap(i);
                 TextOption option = new TextOption(map);
@@ -542,10 +551,8 @@ public class ImageMarkerManager extends ReactContextBaseJavaModule {
             }
 
             bos = new BufferedOutputStream(new FileOutputStream(dest));
-
             icon.compress(getSaveFormat(saveFormat), quality, bos);
             bos.flush();
-            Log.e("chengkun" , dest);
             //保存成功的
             promise.resolve(dest);
         } catch (Exception e) {

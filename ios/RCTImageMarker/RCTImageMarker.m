@@ -499,6 +499,11 @@ RCT_EXPORT_METHOD(addMultipleTexts: (nonnull NSDictionary *)src
         }
 
         // Do mark
+        if (textOptions.count == 0) {
+            saveImageForMarker(fullPath, scaledImage, quality, [self isPng:saveFormat]);
+            resolve(fullPath);
+            return;
+        }
         // 转model对象数组
         NSMutableArray <TextOption *>*modelOptions = [NSMutableArray array];
         for (NSDictionary *option in textOptions) {
@@ -538,7 +543,6 @@ RCT_EXPORT_METHOD(addMultipleTexts: (nonnull NSDictionary *)src
             reject(@"error",@"Can't mark the image.", error);
             return;
         }
-        NSLog(@" file from the path");
 
         saveImageForMarker(fullPath, scaledImage, quality, [self isPng:saveFormat]);
         resolve(fullPath);
