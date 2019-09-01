@@ -594,10 +594,6 @@ public class ImageMarkerManager extends ReactContextBaseJavaModule {
             final String saveFormat,
             final Promise promise
     ) {
-        if (textOptions == null || textOptions.size() == 0) {
-            promise.reject("error", "mark should not be empty");
-        }
-
         try {
 
             final String uri = src.getString(PROP_ICON_URI);
