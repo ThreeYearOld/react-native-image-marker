@@ -1,12 +1,16 @@
 package com.jimmydaddy.imagemarker;
 
+import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -14,23 +18,33 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.facebook.binaryresource.FileBinaryResource;
+import com.facebook.cache.common.SimpleCacheKey;
+import com.facebook.common.memory.PooledByteBuffer;
+import com.facebook.common.memory.PooledByteBufferInputStream;
 import com.facebook.common.references.CloseableReference;
+import com.facebook.datasource.BaseDataSubscriber;
 import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
 import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.views.imagehelper.ImageSource;
 import com.facebook.react.views.text.ReactFontManager;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -442,6 +456,7 @@ public class ImageMarkerManager extends ReactContextBaseJavaModule {
             Paint photoPaint = new Paint();
             //获取跟清晰的图像采样
             photoPaint.setDither(true);
+            photoPaint.setAntiAlias(true);
             //过滤一些
 //            if (percent > 1) {
 //                prePhoto = Bitmap.createScaledBitmap(prePhoto, width, height, true);
@@ -604,22 +619,66 @@ public class ImageMarkerManager extends ReactContextBaseJavaModule {
             Log.d(IMAGE_MARKER_TAG, src.toString());
 
             if (isFrescoImg(uri)) {
+                Fresco.getImagePipeline().clearCaches();
                 ImageRequest imageRequest = ImageRequest.fromUri(uri);
-                DataSource<CloseableReference<CloseableImage>> dataSource = Fresco.getImagePipeline().fetchDecodedImage(imageRequest, null);
+//                DataSource<CloseableReference<CloseableImage>> dataSource = Fresco.getImagePipeline().fetchDecodedImage(imageRequest, null);
+                DataSource<CloseableReference<PooledByteBuffer>> dataSource = Fresco.getImagePipeline().fetchEncodedImage(imageRequest, null);
+
                 Executor executor = Executors.newSingleThreadExecutor();
-                dataSource.subscribe(new BaseBitmapDataSubscriber() {
+//                dataSource.subscribe(new BaseBitmapDataSubscriber() {
+//                    @Override
+//                    public void onNewResultImpl(@Nullable Bitmap bitmap) {
+//                        if (bitmap != null) {
+//                            Bitmap bg = Utils.scaleBitmap(bitmap, scale);
+//                            markImageByMultipleText(bg, null, textOptions, quality, dest, saveFormat, promise);
+//                        } else {
+//                            promise.reject("marker error", "Can't retrieve the file from the src: " + uri);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailureImpl(DataSource dataSource) {
+//                        promise.reject("error", "Can't request the image from the uri: " + uri, dataSource.getFailureCause());
+//                    }
+//                }, executor);
+
+                dataSource.subscribe(new BaseDataSubscriber<CloseableReference<PooledByteBuffer>>() {
                     @Override
-                    public void onNewResultImpl(@Nullable Bitmap bitmap) {
-                        if (bitmap != null) {
-                            Bitmap bg = Utils.scaleBitmap(bitmap, scale);
-                            markImageByMultipleText(bg, null, textOptions, quality, dest, saveFormat, promise);
-                        } else {
-                            promise.reject("marker error", "Can't retrieve the file from the src: " + uri);
+                    protected void onNewResultImpl(DataSource<CloseableReference<PooledByteBuffer>> dataSource) {
+                        if (!dataSource.isFinished()) {
+                            return;
                         }
+                        CloseableReference<PooledByteBuffer> ref = dataSource.getResult();
+                        try {
+                            PooledByteBuffer result = ref.get();
+                            InputStream is = new PooledByteBufferInputStream(result);
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            byte[] buff = new byte[1024];
+                            int len = 0;
+                            while ((len = is.read(buff)) != -1) {
+                                bos.write(buff, 0, len);
+                            }
+                            is.close();
+                            bos.close();
+                            byte[] imgByte = bos.toByteArray();
+
+
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            Bitmap bg = BitmapFactory.decodeByteArray(imgByte, 0, imgByte.length, options);
+                            bg = Utils.scaleBitmap(bg, scale);
+                            markImageByMultipleText(bg, null, textOptions, quality, dest, saveFormat, promise);
+
+
+                        } catch (Exception e) {
+                            promise.reject("marker error", e.getMessage());
+                        } finally {
+                            CloseableReference.closeSafely(ref);
+                        }
+
                     }
 
                     @Override
-                    public void onFailureImpl(DataSource dataSource) {
+                    protected void onFailureImpl(DataSource<CloseableReference<PooledByteBuffer>> dataSource) {
                         promise.reject("error", "Can't request the image from the uri: " + uri, dataSource.getFailureCause());
                     }
                 }, executor);
